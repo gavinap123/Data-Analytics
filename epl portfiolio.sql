@@ -12,29 +12,16 @@ SELECT num_draws,
 FROM draw_stats;
 
 --What is the total number of goals scored by each team in the 2005 season?
-WITH home_goals AS (
-    SELECT 
-        home AS team,
-        SUM(homegoals) AS goals
-    FROM matches
-    WHERE season_end_year = 2005
-    GROUP BY home
-),
-away_goals AS (
-    SELECT 
-        away AS team,
-        SUM(awaygoals) AS goals
-    FROM matches
-    WHERE season_end_year = 2005
-    GROUP BY away
-)
 SELECT 
     team,
     SUM(goals) AS total_goals
 FROM (
-    SELECT * FROM home_goals
-    UNION ALL
-    SELECT * FROM away_goals
+    SELECT 
+        home AS team,
+        SUM(CASE WHEN season_end_year = 2005 THEN homegoals ELSE 0 END) AS goals,
+        SUM(CASE WHEN season_end_year = 2005 THEN awaygoals ELSE 0 END) AS away_goals
+    FROM matches
+    GROUP BY home, away
 ) AS combined_goals
 GROUP BY team
 ORDER BY total_goals DESC;
